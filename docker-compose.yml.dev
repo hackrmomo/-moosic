@@ -1,0 +1,40 @@
+version: '3.9'
+networks:
+  server:
+    external: true
+  moosic:
+    driver: bridge
+services:
+  dbmoosic:
+    container_name: dbmoosic
+    image: postgres
+    restart: always
+    networks:
+      moosic:
+        aliases:
+          - db
+    env_file:
+      - .env
+    volumes:
+      - ./db:/var/lib/postgresql/data
+  api:
+    container_name: api
+    build:
+      context: ./api
+      dockerfile: Dockerfile.dev
+    restart: always
+    ports:
+      - 3000:3000
+    networks:
+      moosic:
+        aliases:
+          - api
+      server:
+        aliases:
+          - moosichackrlabs
+    env_file:
+      - .env
+    volumes:
+      - ./api:/usr/src/api
+    depends_on:
+      - dbmoosic
